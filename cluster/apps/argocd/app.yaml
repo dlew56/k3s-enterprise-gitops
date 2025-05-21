@@ -10,6 +10,11 @@ spec:
     chart: argo-cd
     targetRevision: 5.51.6
     helm:
+      parameters:
+        - name: global.name
+          value: argocd
+        - name: fullnameOverride
+          value: argocd
       values: |
         server:
           service:
