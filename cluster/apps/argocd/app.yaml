@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/dlew56/k3s-enterprise-gitops.git
-    targetRevision: main
-    path: cluster/apps/argocd
+    repoURL: https://argoproj.github.io/argo-helm
+    chart: argo-cd
+    targetRevision: 5.51.6
     helm:
       values: |
         server:

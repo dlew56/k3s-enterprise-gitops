@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/dlew56/k3s-enterprise-gitops.git
     targetRevision: main
-    path: cluster/apps
+    path: cluster/apps/argocd
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
