@@ -15,11 +15,8 @@ spec:
           service:
             type: LoadBalancer
         repoServer:
-          service:
-            ports:
-              - name: https-repo-server
-                port: 8081
-                targetPort: 8081
+          containerPorts:
+            repoServer: 8081
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
