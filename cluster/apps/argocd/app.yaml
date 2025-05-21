@@ -15,8 +15,10 @@ spec:
           service:
             type: LoadBalancer
         repoServer:
-          containerPorts:
-            repoServer: 8081
+          service:
+            enabled: false
+          podLabels:
+            app.kubernetes.io/instance: argocd
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
