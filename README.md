@@ -94,4 +94,82 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 - [cert-manager](https://cert-manager.io/)
 - [Prometheus Helm](https://github.com/prometheus-community/helm-charts)
 - [Loki](https://grafana.com/oss/loki/)
-- [Velero](https://velero.io/) 
+- [Velero](https://velero.io/)
+
+# K3s Enterprise GitOps
+
+This repository contains the manifests and configuration for managing an enterprise-grade K3s cluster using GitOps principles with ArgoCD.
+
+---
+
+## Repository Structure
+
+```
+k3s-enterprise-gitops/
+├── cluster/
+│   ├── base/
+│   │   └── namespaces.yaml         # Namespace definitions
+│   └── apps/
+│       ├── argocd/
+│       │   └── app.yaml           # ArgoCD Application manifest (installs ArgoCD via Helm)
+│       ├── keycloak/
+│       │   └── app.yaml           # Keycloak Application manifest
+│       └── ... (other apps)
+├── apps/
+│   └── ... (app overlays, e.g. ingress)
+└── argo-projects/
+    └── ... (optional ArgoCD project definitions)
+```
+
+---
+
+## GitOps Bootstrapping: Installing ArgoCD
+
+Because ArgoCD manages itself via GitOps, you need to perform a one-time manual install so it can pick up its Application manifest from this repo. After that, ArgoCD will manage itself and all other apps declaratively.
+
+### 1. **Manually Install ArgoCD (One Time Only)**
+
+```
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+### 2. **Wait for ArgoCD to Be Ready**
+
+```
+kubectl -n argocd get pods
+```
+Wait until all pods are `Running`.
+
+### 3. **ArgoCD Syncs Its Application Manifest**
+
+- ArgoCD will detect the `Application` manifest in `cluster/apps/argocd/app.yaml` and begin managing itself via Helm, as defined in this repo.
+
+### 4. **(Optional but Recommended) Remove the Bootstrap Install**
+
+Once ArgoCD is running and managing itself via the Application manifest, you can remove the bootstrap install to ensure only the Helm-managed version remains:
+
+```
+kubectl -n argocd delete -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+ArgoCD will immediately recreate the resources as managed by your Application manifest.
+
+---
+
+## Workflow
+
+1. **Edit manifests in this repo** (add apps, update configs, etc).
+2. **Push changes to GitHub**.
+3. **ArgoCD automatically syncs changes to your cluster**.
+
+---
+
+## Next Steps
+- Add and configure more applications (Keycloak, NGINX Ingress, etc) in `cluster/apps/`.
+- Use ArgoCD UI to monitor and manage your cluster state.
+
+---
+
+## References
+- [ArgoCD Docs](https://argo-cd.readthedocs.io/en/stable/getting_started/)
+- [K3s Docs](https://rancher.com/docs/k3s/latest/en/) 
