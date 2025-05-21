@@ -6,23 +6,13 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://argoproj.github.io/argo-helm
-    chart: argo-cd
-    targetRevision: 5.51.6
-    helm:
-      values: |
-        server:
-          service:
-            type: LoadBalancer
-        repoServer:
-          service:
-            enabled: false
-          podLabels:
-            app.kubernetes.io/instance: argocd
+    repoURL: https://github.com/dlew56/k3s-enterprise-gitops.git
+    targetRevision: HEAD
+    path: cluster/base
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
   syncPolicy:
     automated:
-      prune: false  # Important: Don't prune this time
       selfHeal: true
+      prune: true
