@@ -13,8 +13,6 @@ spec:
       parameters:
         - name: global.name
           value: argocd
-        - name: fullnameOverride
-          value: argocd
       values: |
         server:
           service:
