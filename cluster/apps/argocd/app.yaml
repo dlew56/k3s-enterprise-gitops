@@ -11,7 +11,7 @@ spec:
     targetRevision: 5.51.6
     helm:
       parameters:
-        - name: global.name
+        - name: nameOverride
           value: argocd
       values: |
         server:
