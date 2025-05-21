@@ -10,13 +10,16 @@ spec:
     chart: argo-cd
     targetRevision: 5.51.6
     helm:
-      parameters:
-        - name: nameOverride
-          value: argocd
       values: |
         server:
           service:
             type: LoadBalancer
+        repoServer:
+          service:
+            ports:
+              - name: https-repo-server
+                port: 8081
+                targetPort: 8081
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
