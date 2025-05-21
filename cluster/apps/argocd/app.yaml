@@ -15,10 +15,15 @@ spec:
           service:
             type: LoadBalancer
         repoServer:
-          service:
-            enabled: false
+          containerPorts:
+            repoServer: 8081
           podLabels:
             app.kubernetes.io/instance: argocd
+          service:
+            ports:
+              - name: https-repo-server
+                port: 8081
+                targetPort: repoServer
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
