@@ -1,1 +1,4 @@
 k3s.yaml
+*.crt
+*.key
+*.pfx
