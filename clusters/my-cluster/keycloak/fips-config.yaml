@@ -1,0 +1,45 @@
+# fips-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-fips-config
+  namespace: keycloak-fips
+data:
+  fips.security: |
+    # FIPS 140-2 compliant security properties
+    security.provider.1=SUN
+    security.provider.2=SunRsaSign
+    security.provider.3=SunEC
+    security.provider.4=SunJSSE
+    security.provider.5=SunJCE
+    security.provider.6=SunJGSS
+    security.provider.7=SunSASL
+    security.provider.8=XMLDSig
+    security.provider.9=SunPCSC
+    security.provider.10=JdkLDAP
+    security.provider.11=JdkSASL
+    
+    # Disable non-FIPS algorithms
+    jdk.tls.disabledAlgorithms=SSLv3, RC4, DES, MD5withRSA, DH keySize < 1024, EC keySize < 224, 3DES_EDE_CBC, anon, NULL
+    jdk.certpath.disabledAlgorithms=MD2, MD5, SHA1 jdkCA & usage TLSServer, RSA keySize < 1024, DSA keySize < 1024, EC keySize < 224
+    
+    # Enable FIPS mode
+    com.redhat.fips=true
+  
+  java.security: |
+    # FIPS 140-2 Security Configuration
+    security.provider.1=SUN
+    security.provider.2=SunRsaSign
+    security.provider.3=SunEC
+    security.provider.4=SunJSSE
+    security.provider.5=SunJCE
+    security.provider.6=SunJGSS
+    security.provider.7=SunSASL
+    security.provider.8=XMLDSig
+    security.provider.9=SunPCSC
+    security.provider.10=JdkLDAP
+    security.provider.11=JdkSASL
+    
+    # FIPS compliant algorithms only
+    jdk.tls.disabledAlgorithms=SSLv3, RC4, DES, MD5withRSA, DH keySize < 2048, EC keySize < 224, 3DES_EDE_CBC, anon, NULL
+    jdk.certpath.disabledAlgorithms=MD2, MD5, SHA1 jdkCA & usage TLSServer, RSA keySize < 2048, DSA keySize < 2048, EC keySize < 224

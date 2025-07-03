@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: keycloak-fips
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      initContainers:
+      - name: wait-for-db
+        image: busybox:1.35
+        command: ['sh', '-c', 'until nc -z postgresql 5432; do echo waiting for db; sleep 2; done;']
+      
+      containers:
+      - name: keycloak
+        image: dlew56/custom-keycloak-fips:latest
+        args:
+        - "start-dev"
+        - "--features=fips"
+        - "--fips-mode=non-strict"
+        - "--log-level=INFO,org.keycloak.common.crypto:TRACE,org.keycloak.crypto:TRACE"
+        env:
+        - name: KC_FIPS_MODE
+          #value: "non-strict"
+          value: "strict"
+        - name: KC_FEATURES
+          value: "fips"
+        - name: JAVA_OPTS_APPEND
+          value: "-Dcom.redhat.fips=true"
+        - name: KEYCLOAK_ADMIN
+          value: "admin"
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-admin-secret
+              key: password
+        - name: KC_DB
+          value: "postgres"
+        - name: KC_DB_URL
+          value: "jdbc:postgresql://postgresql:5432/keycloak"
+        - name: KC_DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-db-secret
+              key: username
+        - name: KC_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-db-secret
+              key: password
+        - name: KC_HOSTNAME_STRICT
+          value: "false"
+        - name: KC_HOSTNAME_STRICT_HTTPS
+          value: "false"
+        - name: KC_HTTP_ENABLED
+          value: "true"
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 8443
+          name: https
+        readinessProbe:
+          httpGet:
+            path: /realms/master
+            port: 8080
+          initialDelaySeconds: 120
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /realms/master
+            port: 8080
+          initialDelaySeconds: 180
+          periodSeconds: 30
+        volumeMounts:
+        - name: java-security
+          mountPath: /opt/keycloak/conf/java.security
+          subPath: java.security
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+      volumes:
+      - name: java-security
+        configMap:
+          name: keycloak-fips-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: keycloak-fips
+spec:
+  selector:
+    app: keycloak
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    nodePort: 30900
+  - name: https
+    port: 8443
+    targetPort: 8443
+  type: NodePort
